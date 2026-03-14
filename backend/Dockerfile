@@ -15,6 +15,6 @@ COPY . .
 
 RUN mkdir -p uploads/persons uploads/videos uploads/frames
 
-EXPOSE 8000
+EXPOSE 8080
 
 CMD ["python", "main.py"]
