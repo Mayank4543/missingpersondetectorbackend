@@ -12,7 +12,6 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import base64
 import json
-from deepface import DeepFace
 import asyncio
 from typing import List
 import threading
@@ -79,6 +78,8 @@ async def broadcast_alert(message: dict):
 def compare_faces(img1_path: str, img2_path: str) -> dict:
     """Compare two face images using DeepFace."""
     try:
+        # Lazy import avoids heavy model framework initialization during app startup.
+        from deepface import DeepFace
         result = DeepFace.verify(
             img1_path=img1_path,
             img2_path=img2_path,
@@ -640,6 +641,7 @@ async def scan_group_photo(person_id: str = Form(...), group_photo: UploadFile =
     h, w = img.shape[:2]
 
     try:
+        from deepface import DeepFace
         face_objs = DeepFace.extract_faces(img_path=group_path, enforce_detection=False, detector_backend="opencv")
     except Exception as e:
         face_objs = []
