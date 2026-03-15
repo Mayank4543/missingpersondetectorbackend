@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 from datetime import datetime
 from pymongo import MongoClient
+from dotenv import load_dotenv
 import base64
 import json
 from deepface import DeepFace
@@ -18,6 +19,8 @@ import threading
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 app = FastAPI(title="Missing Person Finder API")
 
@@ -36,9 +39,15 @@ os.makedirs("uploads/frames", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # MongoDB
-MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
+MONGO_URL = os.getenv("MONGO_URL")
+if not MONGO_URL:
+    raise RuntimeError("MONGO_URL is not set. Configure it in .env or environment variables.")
 client = MongoClient(MONGO_URL)
-db = client["missing_persons"]
+MONGO_DB_NAME = os.getenv("MONGO_DB_NAME")
+if MONGO_DB_NAME:
+    db = client[MONGO_DB_NAME]
+else:
+    db = client.get_default_database() or client["missing_persons"]
 persons_col = db["persons"]
 matches_col = db["matches"]
 alerts_col = db["alerts"]
@@ -937,4 +946,5 @@ async def reply_to_tip(
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
+    port = int(os.getenv("PORT", "8080"))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

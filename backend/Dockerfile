@@ -15,6 +15,8 @@ COPY . .
 
 RUN mkdir -p uploads/persons uploads/videos uploads/frames
 
+ENV PORT=8080
+
 EXPOSE 8080
 
 CMD ["python", "main.py"]
